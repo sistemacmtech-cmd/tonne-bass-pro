@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tone Bass Pro Studio - Digital Audio Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#eab308',
+                            cyan: '#06b6d4',
+                            dark: '#0a0b0e',
+                            rack: '#12141a',
+                            panel: '#181b22',
+                            border: '#282d37',
+                            accent: '#3b82f6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #08090c;
+            color: #e2e8f0;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Metallic & Rack Panel Effects */
+        .rack-panel {
+            background: linear-gradient(180deg, #1c2029 0%, #111319 100%);
+            border: 1px solid #2a303d;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 25px -5px rgba(0,0,0,0.8);
+        }
+
+        .sansamp-metal {
+            background: radial-gradient(circle at 50% 0%, #20242f 0%, #0d0f13 100%);
+            border: 2px solid #ca8a04;
+            box-shadow: inset 0 0 20px rgba(202, 138, 4, 0.15), 0 8px 30px rgba(0,0,0,0.9);
+        }
+
+        .pedal-box {
+            background: linear-gradient(180deg, #181c24 0%, #0e1015 100%);
+            border: 1px solid #2b3240;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+
+        /* Hardware Knobs */
+        .knob-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .knob {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4b5263 0%, #1a1d24 70%, #0c0d10 100%);
+            border: 2px solid #090a0c;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.3);
+            cursor: pointer;
+            position: relative;
+            transform: rotate(-135deg);
+            transition: transform 0.05s ease-out;
+            touch-action: none;
+        }
+
+        .knob::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 12px;
+            background-color: #eab308;
+            border-radius: 2px;
+            box-shadow: 0 0 6px rgba(234, 179, 8, 0.9);
+        }
+
+        .knob-cyan::after {
+            background-color: #06b6d4;
+            box-shadow: 0 0 6px rgba(6, 182, 212, 0.9);
+        }
+
+        .knob-silver::after {
+            background-color: #f3f4f6;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+        }
+
+        /* LED Indicator Lights */
+        .led-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #1a0000;
+            border: 1px solid #000;
+            transition: all 0.2s ease;
+        }
+        .led-indicator.active-amber {
+            background-color: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00, inset 0 -1px 3px rgba(0,0,0,0.5);
+        }
+        .led-indicator.active-cyan {
+            background-color: #00f0ff;
+            box-shadow: 0 0 10px #00f0ff, inset 0 -1px 3px rgba(0,0,0,0.5);
+        }
+        .led-indicator.active-red {
+            background-color: #ff2222;
+            box-shadow: 0 0 12px #ff2222, inset 0 -1px 3px rgba(0,0,0,0.5);
+        }
+        .led-indicator.active-green {
+            background-color: #10b981;
+            box-shadow: 0 0 10px #10b981, inset 0 -1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Precision Meter Needle */
+        .vu-needle {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            width: 2px;
+            height: 58px;
+            background: #dc2626;
+            transform-origin: bottom center;
+            transform: rotate(-45deg);
+            transition: transform 0.06s ease-out;
+            box-shadow: 0 0 3px rgba(0,0,0,0.6);
+        }
+
+        /* Hardware Stomp Switch */
+        .stomp-switch {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #9ca3af 0%, #374151 70%, #111827 100%);
+            border: 3px solid #030712;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.8), inset 0 2px 3px rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: transform 0.05s, box-shadow 0.05s;
+        }
+        .stomp-switch:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.9);
+        }
+
+        /* Custom EQ Fader Tracks */
+        .eq-fader-track {
+            position: relative;
+            width: 8px;
+            height: 150px;
+            background: #090b0e;
+            border-radius: 4px;
+            border: 1px solid #1f242e;
+            box-shadow: inset 0 0 6px #000;
+        }
+
+        .eq-fader-thumb {
+            position: absolute;
+            width: 26px;
+            height: 16px;
+            left: -9px;
+            background: linear-gradient(180deg, #4b5563 0%, #111827 100%);
+            border: 1px solid #6b7280;
+            border-radius: 3px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.3);
+            cursor: pointer;
+            touch-action: none;
+        }
+        .eq-fader-thumb::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #06b6d4;
+            transform: translateY(-50%);
+            box-shadow: 0 0 4px #06b6d4;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #08090c; }
+        ::-webkit-scrollbar-thumb { background: #1e232d; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2e3545; }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-200">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full bg-brand-dark/95 border-b border-brand-border backdrop-blur sticky top-0 z-50 px-4 lg:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-600 to-amber-400 flex items-center justify-center shadow-lg shadow-yellow-500/20 text-black">
+                <i class="fa-solid fa-guitar text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-black font-orbitron tracking-wider text-white flex items-center gap-2">
+                    TONE BASS <span class="text-xs px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">PRO STUDIO</span>
+                </h1>
+                <p class="text-[11px] text-slate-400 font-medium">Modelador de Baixo, DSP Engine & Plataforma de Produção</p>
+            </div>
+        </div>
+
+        <!-- Master Live Monitor, Input/Output & Settings Toggle -->
+        <div class="flex items-center gap-3 md:gap-6">
+            <!-- Low Latency Live Monitor Switch -->
+            <button id="btn-live-monitor" class="px-4 py-2 rounded-lg font-orbitron font-bold text-xs tracking-wider flex items-center gap-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all shadow-md active:scale-95">
+                <span id="led-live-monitor" class="led-indicator"></span>
+                <span id="txt-live-monitor">MONITORAMENTO AO VIVO</span>
+            </button>
+
+            <!-- Master Gain Sliders -->
+            <div class="hidden lg:flex items-center gap-4 bg-brand-panel/80 px-4 py-1.5 rounded-lg border border-brand-border">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-slate-400 font-mono">INPUT</span>
+                    <input type="range" id="master-input-gain" min="0" max="2" step="0.01" value="1" class="w-16 accent-yellow-500 cursor-pointer">
+                </div>
+                <div class="h-4 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-slate-400 font-mono">MASTER</span>
+                    <input type="range" id="master-output-gain" min="0" max="2" step="0.01" value="1" class="w-16 accent-cyan-500 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Settings Button -->
+            <button id="btn-open-settings" class="p-2.5 rounded-lg bg-brand-panel border border-brand-border hover:bg-slate-800 text-slate-300 transition">
+                <i class="fa-solid fa-sliders text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Studio Dashboard Container -->
+    <div class="flex-1 max-w-[1600px] w-full mx-auto p-3 lg:p-6 flex flex-col gap-6">
+
+        <!-- RACK SECTION 1: SANSAMP BASS DRIVER DI & VU ANALYZER & TUNER -->
+        <section class="rack-panel p-4 lg:p-6 rounded-2xl relative">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+                <!-- Analog VU Meter & Bass Chromatic Tuner -->
+                <div class="lg:col-span-4 bg-black/60 p-4 rounded-xl border border-brand-border flex flex-col justify-between items-center relative overflow-hidden">
+                    <div class="w-full flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                        <span class="text-xs font-bold text-yellow-500 font-orbitron tracking-widest"><i class="fa-solid fa-gauge-high mr-1"></i> ANALISADOR VU & CLIP</span>
+                        <div id="clip-indicator" class="flex items-center gap-1">
+                            <span class="text-[9px] font-bold text-red-500">CLIP</span>
+                            <span id="led-clip" class="led-indicator"></span>
+                        </div>
+                    </div>
+
+                    <!-- Vintage VU Dial -->
+                    <div class="relative w-52 h-28 bg-amber-100/90 border-2 border-amber-900/60 rounded-t-full overflow-hidden flex justify-center items-end shadow-inner my-1">
+                        <div class="absolute top-3 w-full px-5 flex justify-between text-[9px] font-extrabold text-amber-950 font-mono">
+                            <span>-20</span>
+                            <span>-10</span>
+                            <span>-5</span>
+                            <span>0</span>
+                            <span class="text-red-700">+3dB</span>
+                        </div>
+                        <div class="absolute bottom-2 text-[8px] font-black text-amber-900 font-orbitron tracking-widest">TONE BASS PRO ANALYZER</div>
+                        <div id="vu-needle" class="vu-needle"></div>
+                    </div>
+
+                    <!-- Chromatic Bass Tuner -->
+                    <div class="w-full bg-slate-950/90 p-3 rounded-lg border border-slate-800 flex items-center justify-between px-4 mt-2">
+                        <div>
+                            <span class="text-[9px] text-slate-500 block font-bold font-mono">AFINADOR</span>
+                            <span id="tuner-note" class="text-2xl font-black font-orbitron text-yellow-500">--</span>
+                        </div>
+                        <div id="tuner-tuning-bar" class="flex items-center gap-1">
+                            <span id="tune-flat" class="w-2 h-4 rounded bg-slate-800"></span>
+                            <span id="tune-perfect" class="w-3 h-6 rounded bg-emerald-500 opacity-20"></span>
+                            <span id="tune-sharp" class="w-2 h-4 rounded bg-slate-800"></span>
+                        </div>
+                        <div class="text-right">
+                            <span id="tuner-freq" class="text-xs font-bold text-slate-300 font-mono block">0.0 Hz</span>
+                            <span id="tuner-cents" class="text-[10px] text-slate-500 font-mono">0 cents</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SANSAMP BASS DRIVER DI MODEL -->
+                <div class="lg:col-span-8 sansamp-metal p-5 rounded-xl flex flex-col justify-between relative">
+                    <div class="flex justify-between items-center border-b border-yellow-600/30 pb-3 mb-3">
+                        <div>
+                            <h2 class="text-lg lg:text-xl font-black font-orbitron text-yellow-500 tracking-wider">
+                                SANSAMP BASS DRIVER DI <span class="text-xs text-slate-400 font-normal font-sans">(Modelo Analógico de Tubo)</span>
+                            </h2>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <!-- Mid Shift Switch -->
+                            <button id="btn-mid-shift" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-yellow-600/40 text-[10px] font-bold font-mono text-yellow-500 transition">
+                                MID SHIFT: <span id="txt-mid-shift">500 Hz</span>
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold font-orbitron text-slate-300">ENGAGE</span>
+                                <span id="led-sansamp" class="led-indicator active-red"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SansAmp Controls Grid -->
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 text-center my-2">
+                        <!-- DRIVE -->
+                        <div class="flex flex-col items-center">
+                            <label class="text-[11px] font-bold text-slate-300 mb-1.5 font-orbitron">DRIVE</label>
+                            <div class="knob-wrapper">
+                                <div class="knob" id="knob-drive" data-param="drive" data-min="0" data-max="100" data-val="45"></div>
+                            </div>
+                            <span class="text-[10px] text-yellow-500 font-mono mt-1.5" id="val-drive">45%</span>
+                        </div>
+
+                        <!-- PRESENCE -->
+                        <div class="flex flex-col items-center">
+                            <label class="text-[11px] font-bold text-slate-300 mb-1.5 font-orbitron">PRESENCE</label>
+                            <div class="knob-wrapper">
+                                <div class="knob" id="knob-presence" data-param="presence" data-min="0" data-max="100" data-val="55"></div>
+                            </div>
+                            <span class="text-[10px] text-yellow-500 font-mono mt-1.5" id="val-presence">55%</span>
+                        </div>
+
+                        <!-- BLEND -->
+                        <div class="flex flex-col items-center">
+                            <label class="text-[11px] font-bold text-slate-300 mb-1.5 font-orbitron">BLEND</label>
+                            <div class="knob-wrapper">
+                                <div class="knob" id="knob-blend" data-param="blend" data-min="0" data-max="100" data-val="85"></div>
+                            </div>
+                            <span class="text-[10px] text-yellow-500 font-mono mt-1.5" id="val-blend">85%</span>
+                        </div>
+
+                        <!-- BASS -->
+                        <div class="flex flex-col items-center">
+                            <label class="text-[11px] font-bold text-slate-300 mb-1.5 font-orbitron">BASS</label>
+                            <div class="knob-wrapper">
+                                <div class="knob" id="knob-bass" data-param="bass" data-min="-12" data-max="12" data-val="3"></div>
+                            </div>
+                            <span class="text-[10px] text-yellow-500 font-mono mt-1.5" id="val-bass">+3 dB</span>
+                        </div>
+
+                        <!-- TREBLE -->
+                        <div class="flex flex-col items-center">
+                            <label class="text-[11px] font-bold text-slate-300 mb-1.5 font-orbitron">TREBLE</label>
+                            <div class="knob-wrapper">
+                                <div class="knob" id="knob-treble" data-param="treble" data-min="-12" data-max="12" data-val="2"></div>
+                            </div>
+                            <span class="text-[10px] text-yellow-500 font-mono mt-1.5" id="val-treble">+2 dB</span>
+                        </div>
+
+                        <!-- LEVEL -->
+                        <div class="flex flex-col items-center">
+                            <label class="text-[11px] font-bold text-slate-300 mb-1.5 font-orbitron">LEVEL</label>
+                            <div class="knob-wrapper">
+                                <div class="knob" id="knob-level" data-param="level" data-min="0" data-max="100" data-val="70"></div>
+                            </div>
+                            <span class="text-[10px] text-yellow-500 font-mono mt-1.5" id="val-level">70%</span>
+                        </div>
+                    </div>
+
+                    <!-- Foot Switch Bypass -->
+                    <div class="flex justify-center items-center gap-3 mt-3 pt-2 border-t border-slate-800">
+                        <button id="switch-sansamp" class="stomp-switch"></button>
+                        <span class="text-[10px] font-bold tracking-widest text-slate-400 font-orbitron">PREAMP BYPASS / ENGAGE</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RACK SECTION 2: 10-BAND GRAPHIC EQ & FREQUENCY SPECTRUM CANVAS -->
+        <section class="rack-panel p-4 lg:p-6 rounded-2xl relative">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-3">
+                    <span id="led-eq" class="led-indicator active-cyan"></span>
+                    <div>
+                        <h2 class="text-base font-black font-orbitron text-white tracking-wider">10-BAND BASS SPECTRUM EQUALIZER</h2>
+                        <p class="text-xs text-slate-400">Modelador de Frequências de Precisão & Analisador em Tempo Real</p>
+                    </div>
+                </div>
+
+                <!-- Presets & Controls -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-bold text-slate-400 font-orbitron mr-1">PRESETS DE FÁBRICA:</span>
+                    <button class="eq-preset-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-300 text-xs font-semibold border border-slate-700 transition" data-preset="flat">Flat</button>
+                    <button class="eq-preset-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-300 text-xs font-semibold border border-slate-700 transition" data-preset="slap">Slap Precision</button>
+                    <button class="eq-preset-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-300 text-xs font-semibold border border-slate-700 transition" data-preset="vintage">Vintage Tube</button>
+                    <button class="eq-preset-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-300 text-xs font-semibold border border-slate-700 transition" data-preset="modern">Modern Metal</button>
+                    <button class="eq-preset-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-300 text-xs font-semibold border border-slate-700 transition" data-preset="sub">Sub Bass</button>
+
+                    <button id="btn-eq-toggle" class="ml-2 px-3 py-1 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs font-orbitron transition">
+                        EQ LIGADO
+                    </button>
+                </div>
+            </div>
+
+            <!-- Spectrum Visualizer & Faders Grid Split -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- Live Frequency Canvas -->
+                <div class="lg:col-span-4 bg-slate-950 p-2 rounded-xl border border-slate-800 h-full flex flex-col justify-between">
+                    <span class="text-[10px] font-bold font-mono text-cyan-400 mb-1 block px-2">CURVA DE RESPOSTA DSP</span>
+                    <canvas id="eq-canvas" class="w-full h-36 rounded bg-slate-900/60"></canvas>
+                </div>
+
+                <!-- 10 Faders -->
+                <div id="eq-faders-container" class="lg:col-span-8 grid grid-cols-5 sm:grid-cols-10 gap-2 sm:gap-3 justify-items-center py-3 px-2 bg-black/40 rounded-xl border border-slate-800/80">
+                    <!-- Faders generated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- RACK SECTION 3: MODULAR PEDALBOARD (Compressor, Auto-Wah, Chorus, Octaver, IR Cab Sim) -->
+        <section class="bg-slate-950 p-4 lg:p-6 rounded-2xl border border-brand-border">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-2">
+                <h2 class="text-base font-black font-orbitron text-yellow-500 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-sm"></i> STACK DE PEDAIS DE EFEITO MODULARES
+                </h2>
+                <span class="text-xs text-slate-400 font-mono">Processadores Dinâmicos & Simulador de Gabinete IR</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+
+                <!-- PEDAL 1: OPTO COMPRESSOR -->
+                <div class="pedal-box p-4 rounded-xl flex flex-col justify-between items-center text-center relative border-t-4 border-blue-500">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <span class="text-[11px] font-black font-orbitron text-blue-400">OPTO COMPRESSOR</span>
+                        <span id="led-comp" class="led-indicator"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 my-2 w-full">
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">SUSTAIN</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-comp-sustain" data-param="comp-sustain" data-min="1" data-max="20" data-val="6"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">ATTACK</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-comp-attack" data-param="comp-attack" data-min="1" data-max="100" data-val="25"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="switch-comp" class="stomp-switch mt-2"></button>
+                </div>
+
+                <!-- PEDAL 2: AUTO-WAH / ENVELOPE FILTER -->
+                <div class="pedal-box p-4 rounded-xl flex flex-col justify-between items-center text-center relative border-t-4 border-emerald-500">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <span class="text-[11px] font-black font-orbitron text-emerald-400">AUTO-WAH FILTER</span>
+                        <span id="led-filter" class="led-indicator"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 my-2 w-full">
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">SENSE</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-filter-sense" data-param="filter-sense" data-min="200" data-max="2000" data-val="800"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">RESO</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-filter-reso" data-param="filter-reso" data-min="1" data-max="15" data-val="6"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="switch-filter" class="stomp-switch mt-2"></button>
+                </div>
+
+                <!-- PEDAL 3: STEREO BASS CHORUS -->
+                <div class="pedal-box p-4 rounded-xl flex flex-col justify-between items-center text-center relative border-t-4 border-purple-500">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <span class="text-[11px] font-black font-orbitron text-purple-400">STEREO CHORUS</span>
+                        <span id="led-chorus" class="led-indicator"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 my-2 w-full">
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">RATE</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-chorus-rate" data-param="chorus-rate" data-min="0.1" data-max="5" data-val="1.2"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">DEPTH</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-chorus-depth" data-param="chorus-depth" data-min="0" data-max="100" data-val="50"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="switch-chorus" class="stomp-switch mt-2"></button>
+                </div>
+
+                <!-- PEDAL 4: OCTAVER SUB-HARMONIC -->
+                <div class="pedal-box p-4 rounded-xl flex flex-col justify-between items-center text-center relative border-t-4 border-amber-500">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <span class="text-[11px] font-black font-orbitron text-amber-400">SUB OCTAVER</span>
+                        <span id="led-octave" class="led-indicator"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 my-2 w-full">
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">OCT -1</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-octave-sub" data-param="octave-sub" data-min="0" data-max="100" data-val="40"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-400 font-bold">DRY MIX</span>
+                            <div class="knob-wrapper">
+                                <div class="knob knob-silver" id="knob-octave-dry" data-param="octave-dry" data-min="0" data-max="100" data-val="80"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="switch-octave" class="stomp-switch mt-2"></button>
+                </div>
+
+                <!-- PEDAL 5: CABINET IR SIMULATOR -->
+                <div class="pedal-box p-4 rounded-xl flex flex-col justify-between items-center text-center relative border-t-4 border-red-500">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <span class="text-[11px] font-black font-orbitron text-red-400">GABINETE IR SIM</span>
+                        <span id="led-cab" class="led-indicator active-red"></span>
+                    </div>
+
+                    <div class="w-full my-3 flex flex-col gap-2">
+                        <label class="text-[9px] text-slate-400 font-bold">PERFIL DE RESPOSTA</label>
+                        <select id="select-cab" class="bg-black text-yellow-500 font-orbitron text-[11px] p-2 rounded border border-slate-700 outline-none cursor-pointer text-center">
+                            <option value="8x10">Ampeg SVT 8x10</option>
+                            <option value="4x10">Markbass 4x10</option>
+                            <option value="2x12">Darkglass 2x12</option>
+                            <option value="1x15">Bassman 1x15</option>
+                            <option value="direct">Direct Box (Flat)</option>
+                        </select>
+                    </div>
+
+                    <button id="switch-cab" class="stomp-switch mt-2"></button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PLATFORM SUITE: LOOPER, RECORD & EXPORT, JAM TRACKS PLAYER, METRONOME -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Bass Looper & HD Recorder -->
+            <div class="lg:col-span-6 rack-panel p-5 rounded-2xl flex flex-col justify-between">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
+                    <h3 class="text-sm font-bold font-orbitron text-white flex items-center gap-2">
+                        <i class="fa-solid fa-circle-dot text-red-500"></i> GRAVADOR HD & LOOPER DE BAIXO
+                    </h3>
+                    <span id="looper-status" class="text-xs font-mono font-bold text-slate-400">PRONTO</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Recorder Controls -->
+                    <div class="bg-black/50 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 font-orbitron block mb-2">GRAVAÇÃO MASTER (WAV)</span>
+                        <div class="flex items-center gap-2 mb-3">
+                            <button id="btn-record-master" class="flex-1 py-2 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-xs font-orbitron transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-record-vinyl"></i> GRAVAR
+                            </button>
+                            <button id="btn-stop-master" disabled class="px-3 py-2 rounded bg-slate-800 text-slate-500 font-bold text-xs font-orbitron">
+                                PARAR
+                            </button>
+                        </div>
+                        <a id="download-recording" class="hidden w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs font-orbitron rounded text-center transition">
+                            <i class="fa-solid fa-download mr-1"></i> BAIXAR AUDIO WAV
+                        </a>
+                    </div>
+
+                    <!-- Looper Controls -->
+                    <div class="bg-black/50 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 font-orbitron block mb-2">LOOPER RÁPIDO</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btn-looper-rec" class="py-2 rounded bg-amber-600 hover:bg-amber-500 text-white font-bold text-[10px] font-orbitron">REC/OVER</button>
+                            <button id="btn-looper-play" class="py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] font-orbitron">PLAY</button>
+                            <button id="btn-looper-clear" class="col-span-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px] font-orbitron">LIMPAR LOOP</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jam Tracks Player & Metronome -->
+            <div class="lg:col-span-6 rack-panel p-5 rounded-2xl flex flex-col justify-between">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
+                    <h3 class="text-sm font-bold font-orbitron text-white flex items-center gap-2">
+                        <i class="fa-solid fa-drum text-yellow-500"></i> JAM TRACKS PLAYER & METRÔNOMO
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono font-bold text-cyan-400" id="metronome-bpm-val">120 BPM</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Jam Player -->
+                    <div class="bg-black/50 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-slate-400 font-orbitron">BACKING TRACKS</span>
+                            <button onclick="document.getElementById('jam-file-input').click()" class="text-[10px] font-bold text-yellow-500 hover:underline">
+                                + Carregar MP3
+                            </button>
+                            <input type="file" id="jam-file-input" accept="audio/*" class="hidden">
+                        </div>
+                        <audio id="jam-player" controls class="w-full h-8 accent-yellow-500 mb-2"></audio>
+                        <div class="flex items-center justify-between gap-2 text-[10px] font-mono text-slate-400">
+                            <span>Velocidade:</span>
+                            <input type="range" id="jam-speed" min="0.5" max="1.5" step="0.05" value="1" class="w-24 accent-yellow-500">
+                            <span id="txt-jam-speed">1.0x</span>
+                        </div>
+                    </div>
+
+                    <!-- Metronome -->
+                    <div class="bg-black/50 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 font-orbitron block mb-2">METRÔNOMO DIGITAL</span>
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="range" id="metronome-bpm" min="40" max="220" value="120" class="flex-1 accent-cyan-500">
+                            <button id="btn-tap-tempo" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-cyan-400 rounded border border-slate-700">TAP</button>
+                        </div>
+                        <button id="btn-toggle-metronome" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs font-orbitron rounded transition">
+                            INICIAR METRÔNOMO
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- AUDIO ENGINE, DSP MODELS & PLATFORM LOGIC -->
+    <script>
+        // Web Audio API State
+        let audioCtx = null;
+        let micStream = null;
+        let micSourceNode = null;
+
+        // Gains & Analysers
+        let masterInputGain = null;
+        let masterOutputGain = null;
+        let mainAnalyserNode = null;
+
+        // SansAmp Preamp DSP
+        let sansampEnabled = true;
+        let sansampDriveNode = null;
+        let sansampPresenceNode = null;
+        let sansampBassNode = null;
+        let sansampTrebleNode = null;
+        let sansampLevelNode = null;
+        let sansampDryGain = null;
+        let sansampWetGain = null;
+        let midShiftFreq = 500;
+
+        // 10-Band EQ
+        let eqEnabled = true;
+        const eqFrequencies = [31.25, 62.5, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+        let eqFilters = [];
+
+        // Pedals DSP
+        let compEnabled = false, compNode = null;
+        let filterEnabled = false, filterNode = null;
+        let chorusEnabled = false, chorusDelayNode = null, chorusLfoNode = null, chorusLfoGain = null;
+        let octaveEnabled = false, octaveGainNode = null, octaveSubGainNode = null;
+        let cabEnabled = true, cabFilterNode = null;
+
+        // Recorder & Looper State
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let looperBuffer = null;
+        let looperSource = null;
+        let isLooperRecording = false;
+
+        // Metronome State
+        let isMetronomeRunning = false;
+        let metronomeInterval = null;
+        let tapTimes = [];
+
+        // SansAmp Model Parameters
+        const sansampParams = {
+            drive: 45,
+            presence: 55,
+            blend: 85,
+            bass: 3,
+            treble: 2,
+            level: 70
+        };
+
+        /* --- Render 10-Band EQ Faders UI --- */
+        const eqContainer = document.getElementById('eq-faders-container');
+        eqFrequencies.forEach((freq, idx) => {
+            const freqText = freq >= 1000 ? `${freq / 1000}k` : `${Math.round(freq)}`;
+            const faderHTML = `
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-[9px] font-mono font-bold text-cyan-400" id="eq-val-${idx}">0dB</span>
+                    <div class="eq-fader-track" id="fader-track-${idx}">
+                        <div class="eq-fader-thumb" id="fader-thumb-${idx}" style="bottom: 67px;"></div>
+                    </div>
+                    <span class="text-[9px] font-orbitron font-bold text-slate-300">${freqText}</span>
+                </div>
+            `;
+            eqContainer.insertAdjacentHTML('beforeend', faderHTML);
+        });
+
+        /* --- Audio Context Engine Initialization --- */
+        async function initAudioEngine() {
+            if (audioCtx) return;
+
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext({ latencyHint: 'interactive' });
+
+            masterInputGain = audioCtx.createGain();
+            masterOutputGain = audioCtx.createGain();
+
+            mainAnalyserNode = audioCtx.createAnalyser();
+            mainAnalyserNode.fftSize = 2048;
+
+            // SansAmp Nodes
+            sansampDriveNode = audioCtx.createWaveShaper();
+            sansampPresenceNode = audioCtx.createBiquadFilter();
+            sansampPresenceNode.type = 'highshelf';
+            sansampPresenceNode.frequency.value = 3000;
+
+            sansampBassNode = audioCtx.createBiquadFilter();
+            sansampBassNode.type = 'lowshelf';
+            sansampBassNode.frequency.value = 80;
+
+            sansampTrebleNode = audioCtx.createBiquadFilter();
+            sansampTrebleNode.type = 'highshelf';
+            sansampTrebleNode.frequency.value = 3200;
+
+            sansampLevelNode = audioCtx.createGain();
+            sansampDryGain = audioCtx.createGain();
+            sansampWetGain = audioCtx.createGain();
+
+            updateSansAmpDSP();
+
+            // 10-Band EQ Filters
+            eqFilters = eqFrequencies.map(freq => {
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'peaking';
+                filter.frequency.value = freq;
+                filter.Q.value = 1.4;
+                filter.gain.value = 0;
+                return filter;
+            });
+            for (let i = 0; i < eqFilters.length - 1; i++) {
+                eqFilters[i].connect(eqFilters[i + 1]);
+            }
+
+            // Compressor
+            compNode = audioCtx.createDynamicsCompressor();
+            compNode.threshold.value = -24;
+            compNode.knee.value = 30;
+            compNode.ratio.value = 6;
+            compNode.attack.value = 0.025;
+            compNode.release.value = 0.25;
+
+            // Auto-Wah Filter
+            filterNode = audioCtx.createBiquadFilter();
+            filterNode.type = 'lowpass';
+            filterNode.frequency.value = 800;
+            filterNode.Q.value = 6;
+
+            // Stereo Chorus
+            chorusDelayNode = audioCtx.createDelay();
+            chorusDelayNode.delayTime.value = 0.025;
+            chorusLfoNode = audioCtx.createOscillator();
+            chorusLfoGain = audioCtx.createGain();
+            chorusLfoNode.frequency.value = 1.2;
+            chorusLfoGain.gain.value = 0.005;
+            chorusLfoNode.connect(chorusLfoGain);
+            chorusLfoGain.connect(chorusDelayNode.delayTime);
+            chorusLfoNode.start();
+
+            // Cabinet Simulation
+            cabFilterNode = audioCtx.createBiquadFilter();
+            applyCabSimPreset('8x10');
+
+            // Visual Loop Processors
+            requestAnimationFrame(processAudioVisuals);
+            drawEQSpectrumCanvas();
+        }
+
+        /* --- Reconnect Web Audio Graph --- */
+        function rebuildAudioGraph() {
+            if (!audioCtx || !micSourceNode) return;
+
+            micSourceNode.disconnect();
+            masterInputGain.disconnect();
+            micSourceNode.connect(masterInputGain);
+
+            let current = masterInputGain;
+
+            // 1. SansAmp Preamp
+            if (sansampEnabled) {
+                current.connect(sansampDryGain);
+
+                current.connect(sansampDriveNode);
+                sansampDriveNode.connect(sansampPresenceNode);
+                sansampPresenceNode.connect(sansampBassNode);
+                sansampBassNode.connect(sansampTrebleNode);
+                sansampTrebleNode.connect(sansampLevelNode);
+                sansampLevelNode.connect(sansampWetGain);
+
+                const merger = audioCtx.createGain();
+                sansampDryGain.connect(merger);
+                sansampWetGain.connect(merger);
+
+                current = merger;
+            }
+
+            // 2. 10-Band EQ
+            if (eqEnabled) {
+                current.connect(eqFilters[0]);
+                current = eqFilters[eqFilters.length - 1];
+            }
+
+            // 3. Compressor
+            if (compEnabled) {
+                current.connect(compNode);
+                current = compNode;
+            }
+
+            // 4. Auto-Wah Filter
+            if (filterEnabled) {
+                current.connect(filterNode);
+                current = filterNode;
+            }
+
+            // 5. Chorus
+            if (chorusEnabled) {
+                const chorusSplitter = audioCtx.createGain();
+                current.connect(chorusSplitter);
+                chorusSplitter.connect(chorusDelayNode);
+
+                const chorusMerger = audioCtx.createGain();
+                chorusSplitter.connect(chorusMerger);
+                chorusDelayNode.connect(chorusMerger);
+
+                current = chorusMerger;
+            }
+
+            // 6. Cabinet IR Sim
+            if (cabEnabled) {
+                current.connect(cabFilterNode);
+                current = cabFilterNode;
+            }
+
+            // Master Output & Analyser
+            current.connect(masterOutputGain);
+            masterOutputGain.connect(audioCtx.destination);
+            masterOutputGain.connect(mainAnalyserNode);
+        }
+
+        /* --- Distortion WaveShaper Engine --- */
+        function makeTubeSaturationCurve(amount) {
+            const k = amount;
+            const n_samples = 44100;
+            const curve = new Float32Array(n_samples);
+            for (let i = 0; i < n_samples; ++i) {
+                const x = (i * 2) / n_samples - 1;
+                // Asymmetric tube distortion curve
+                curve[i] = (Math.PI + k) * x / (Math.PI + k * Math.abs(x));
+            }
+            return curve;
+        }
+
+        function updateSansAmpDSP() {
+            if (!audioCtx) return;
+            sansampDriveNode.curve = makeTubeSaturationCurve(sansampParams.drive * 1.8);
+            sansampPresenceNode.gain.value = (sansampParams.presence - 50) / 4;
+            sansampBassNode.gain.value = sansampParams.bass;
+            sansampTrebleNode.gain.value = sansampParams.treble;
+            sansampLevelNode.gain.value = sansampParams.level / 50;
+
+            const blendVal = sansampParams.blend / 100;
+            sansampWetGain.gain.value = blendVal;
+            sansampDryGain.gain.value = 1 - blendVal;
+        }
+
+        function applyCabSimPreset(type) {
+            if (!cabFilterNode) return;
+            if (type === '8x10') {
+                cabFilterNode.type = 'lowpass';
+                cabFilterNode.frequency.value = 4200;
+                cabFilterNode.Q.value = 1.2;
+            } else if (type === '4x10') {
+                cabFilterNode.type = 'lowpass';
+                cabFilterNode.frequency.value = 5200;
+                cabFilterNode.Q.value = 0.9;
+            } else if (type === '2x12') {
+                cabFilterNode.type = 'lowpass';
+                cabFilterNode.frequency.value = 4800;
+                cabFilterNode.Q.value = 1.1;
+            } else if (type === '1x15') {
+                cabFilterNode.type = 'lowpass';
+                cabFilterNode.frequency.value = 3400;
+                cabFilterNode.Q.value = 1.4;
+            } else {
+                cabFilterNode.type = 'allpass';
+            }
+        }
+
+        /* --- Realtime VU Meter & Chromatic Pitch Tuner Process --- */
+        const needleEl = document.getElementById('vu-needle');
+        const tunerNoteEl = document.getElementById('tuner-note');
+        const tunerFreqEl = document.getElementById('tuner-freq');
+        const tunerCentsEl = document.getElementById('tuner-cents');
+        const ledClip = document.getElementById('led-clip');
+
+        const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        function processAudioVisuals() {
+            if (!mainAnalyserNode) return;
+
+            const buffer = new Float32Array(mainAnalyserNode.fftSize);
+            mainAnalyserNode.getFloatTimeDomainData(buffer);
+
+            // Peak & RMS
+            let sum = 0;
+            let maxPeak = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                const val = Math.abs(buffer[i]);
+                if (val > maxPeak) maxPeak = val;
+                sum += val * val;
+            }
+            const rms = Math.sqrt(sum / buffer.length);
+            const db = 20 * Math.log10(Math.max(rms, 0.0001));
+
+            // Peak Clip Warning Light
+            if (maxPeak >= 0.98) {
+                ledClip.className = 'led-indicator active-red';
+            } else {
+                ledClip.className = 'led-indicator';
+            }
+
+            // VU Meter Needle rotation
+            const clampedDb = Math.max(-40, Math.min(3, db));
+            const angle = ((clampedDb + 40) / 43) * 90 - 45;
+            needleEl.style.transform = `rotate(${angle}deg)`;
+
+            // Bass Pitch Auto-Correlation Tuner
+            if (rms > 0.015) {
+                const pitch = autoCorrelatePitch(buffer, audioCtx.sampleRate);
+                if (pitch !== -1) {
+                    const noteNum = 12 * (Math.log(pitch / 440) / Math.log(2)) + 69;
+                    const roundedNote = Math.round(noteNum);
+                    const noteName = noteNames[roundedNote % 12];
+                    const cents = Math.floor((noteNum - roundedNote) * 100);
+
+                    tunerNoteEl.innerText = noteName;
+                    tunerFreqEl.innerText = `${pitch.toFixed(1)} Hz`;
+                    tunerCentsEl.innerText = `${cents > 0 ? '+' : ''}${cents} cents`;
+
+                    // Tuning visual indicators
+                    document.getElementById('tune-flat').style.opacity = cents < -10 ? '1' : '0.2';
+                    document.getElementById('tune-sharp').style.opacity = cents > 10 ? '1' : '0.2';
+                    document.getElementById('tune-perfect').style.opacity = Math.abs(cents) <= 10 ? '1' : '0.2';
+                }
+            } else {
+                tunerNoteEl.innerText = "--";
+                tunerFreqEl.innerText = "0.0 Hz";
+                tunerCentsEl.innerText = "0 cents";
+            }
+
+            requestAnimationFrame(processAudioVisuals);
+        }
+
+        function autoCorrelatePitch(buf, sampleRate) {
+            let SIZE = buf.length;
+            let rms = 0;
+            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.01) return -1;
+
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+            for (let i = 0; i < SIZE / 2; i++) {
+                if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+            }
+            for (let i = 1; i < SIZE / 2; i++) {
+                if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+            }
+
+            buf = buf.slice(r1, r2);
+            SIZE = buf.length;
+
+            let c = new Array(SIZE).fill(0);
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE - i; j++) {
+                    c[i] = c[i] + buf[j] * buf[j + i];
+                }
+            }
+
+            let d = 0; while (c[d] > c[d + 1]) d++;
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < SIZE; i++) {
+                if (c[i] > maxval) {
+                    maxval = c[i];
+                    maxpos = i;
+                }
+            }
+            let T0 = maxpos;
+            return sampleRate / T0;
+        }
+
+        /* --- EQ Response Spectrum Canvas Drawing --- */
+        function drawEQSpectrumCanvas() {
+            const canvas = document.getElementById('eq-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Frequency Grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+
+            // Draw Frequency Curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 2;
+
+            for (let x = 0; x < canvas.width; x++) {
+                const freq = 20 * Math.pow(1000, x / canvas.width);
+                let totalGain = 0;
+
+                eqFilters.forEach(filter => {
+                    const fVal = filter.frequency.value;
+                    const gain = filter.gain.value;
+                    const dist = Math.abs(Math.log2(freq / fVal));
+                    if (dist < 1) {
+                        totalGain += gain * (1 - dist);
+                    }
+                });
+
+                const y = (canvas.height / 2) - (totalGain * 3);
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            requestAnimationFrame(drawEQSpectrumCanvas);
+        }
+
+        /* --- STREAMING_CHUNK:UI Controls, Switches, Faders & Metronome Engine... --- */
+
+        // Live Monitoring Button
+        const btnLiveMonitor = document.getElementById('btn-live-monitor');
+        const ledLiveMonitor = document.getElementById('led-live-monitor');
+        const txtLiveMonitor = document.getElementById('txt-live-monitor');
+
+        btnLiveMonitor.addEventListener('click', async () => {
+            await initAudioEngine();
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+            if (!micStream) {
+                try {
+                    micStream = await navigator.mediaDevices.getUserMedia({
+                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+                    });
+                    micSourceNode = audioCtx.createMediaStreamSource(micStream);
+                    rebuildAudioGraph();
+
+                    ledLiveMonitor.className = 'led-indicator active-green';
+                    txtLiveMonitor.innerText = 'MONITORATIVO ON';
+                    btnLiveMonitor.classList.add('border-emerald-500');
+                } catch (err) {
+                    alert('Erro ao acessar a entrada de áudio: ' + err.message);
+                }
+            } else {
+                micStream.getTracks().forEach(track => track.stop());
+                micStream = null;
+                ledLiveMonitor.className = 'led-indicator';
+                txtLiveMonitor.innerText = 'MONITORAMENTO AO VIVO';
+                btnLiveMonitor.classList.remove('border-emerald-500');
+            }
+        });
+
+        // Master Volume Sliders
+        document.getElementById('master-input-gain').addEventListener('input', (e) => {
+            if (masterInputGain) masterInputGain.gain.value = parseFloat(e.target.value);
+        });
+        document.getElementById('master-output-gain').addEventListener('input', (e) => {
+            if (masterOutputGain) masterOutputGain.gain.value = parseFloat(e.target.value);
+        });
+
+        // Mid Shift Frequency Toggle
+        document.getElementById('btn-mid-shift').addEventListener('click', () => {
+            midShiftFreq = midShiftFreq === 500 ? 1000 : 500;
+            document.getElementById('txt-mid-shift').innerText = `${midShiftFreq} Hz`;
+        });
+
+        // Interactive Rotary Knobs Logic
+        document.querySelectorAll('.knob').forEach(knob => {
+            let isDragging = false;
+            let startY = 0;
+            let currentVal = parseFloat(knob.dataset.val);
+            const min = parseFloat(knob.dataset.min);
+            const max = parseFloat(knob.dataset.max);
+            const param = knob.dataset.param;
+
+            const updateVisual = (val) => {
+                const pct = (val - min) / (max - min);
+                const angle = -135 + pct * 270;
+                knob.style.transform = `rotate(${angle}deg)`;
+
+                const valLabel = document.getElementById(`val-${param}`);
+                if (valLabel) {
+                    valLabel.innerText = (param === 'bass' || param === 'treble') ? `${val > 0 ? '+' : ''}${val} dB` : `${Math.round(val)}%`;
+                }
+            };
+
+            updateVisual(currentVal);
+
+            knob.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                startY = e.clientY;
+                knob.setPointerCapture(e.pointerId);
+            });
+
+            knob.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const deltaY = startY - e.clientY;
+                startY = e.clientY;
+
+                const step = (max - min) / 100;
+                currentVal = Math.min(max, Math.max(min, currentVal + deltaY * step));
+                knob.dataset.val = currentVal;
+
+                updateVisual(currentVal);
+
+                if (sansampParams.hasOwnProperty(param)) {
+                    sansampParams[param] = currentVal;
+                    updateSansAmpDSP();
+                } else if (param === 'chorus-rate') {
+                    if (chorusLfoNode) chorusLfoNode.frequency.value = currentVal;
+                } else if (param === 'chorus-depth') {
+                    if (chorusLfoGain) chorusLfoGain.gain.value = (currentVal / 100) * 0.01;
+                } else if (param === 'filter-sense') {
+                    if (filterNode) filterNode.frequency.value = currentVal;
+                } else if (param === 'filter-reso') {
+                    if (filterNode) filterNode.Q.value = currentVal;
+                }
+            });
+
+            knob.addEventListener('pointerup', () => { isDragging = false; });
+        });
+
+        // Preamp Footswitch Toggle
+        document.getElementById('switch-sansamp').addEventListener('click', () => {
+            sansampEnabled = !sansampEnabled;
+            document.getElementById('led-sansamp').className = sansampEnabled ? 'led-indicator active-red' : 'led-indicator';
+            rebuildAudioGraph();
+        });
+
+        // 10-Band EQ Interactive Faders Engine
+        eqFrequencies.forEach((freq, idx) => {
+            const track = document.getElementById(`fader-track-${idx}`);
+            const thumb = document.getElementById(`fader-thumb-${idx}`);
+            const valText = document.getElementById(`eq-val-${idx}`);
+            let isDragging = false;
+
+            const setFaderValue = (y) => {
+                const rect = track.getBoundingClientRect();
+                let relY = rect.bottom - y;
+                relY = Math.max(0, Math.min(rect.height, relY));
+
+                thumb.style.bottom = `${relY - 8}px`;
+
+                const gain = ((relY / rect.height) * 24) - 12;
+                valText.innerText = `${gain > 0 ? '+' : ''}${Math.round(gain)}dB`;
+
+                if (eqFilters[idx]) {
+                    eqFilters[idx].gain.value = gain;
+                }
+            };
+
+            track.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                track.setPointerCapture(e.pointerId);
+                setFaderValue(e.clientY);
+            });
+
+            track.addEventListener('pointermove', (e) => {
+                if (isDragging) setFaderValue(e.clientY);
+            });
+
+            track.addEventListener('pointerup', () => { isDragging = false; });
+        });
+
+        // EQ Toggle Button
+        const btnEqToggle = document.getElementById('btn-eq-toggle');
+        btnEqToggle.addEventListener('click', () => {
+            eqEnabled = !eqEnabled;
+            document.getElementById('led-eq').className = eqEnabled ? 'led-indicator active-cyan' : 'led-indicator';
+            btnEqToggle.innerText = eqEnabled ? 'EQ LIGADO' : 'EQ BYPASS';
+            btnEqToggle.className = eqEnabled ? 'ml-2 px-3 py-1 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs font-orbitron transition' : 'ml-2 px-3 py-1 rounded bg-slate-800 text-slate-400 font-bold text-xs font-orbitron transition';
+            rebuildAudioGraph();
+        });
+
+        // EQ Presets Definition
+        const eqPresets = {
+            flat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            slap: [6, 4, 1, -4, -6, -3, 2, 5, 6, 4],
+            vintage: [4, 5, 3, 1, 0, -2, -3, -4, -5, -6],
+            modern: [5, 3, 0, -2, -3, 0, 3, 5, 4, 2],
+            sub: [8, 7, 5, 1, -2, -4, -5, -6, -6, -6]
+        };
+
+        document.querySelectorAll('.eq-preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const presetKey = btn.dataset.preset;
+                const values = eqPresets[presetKey];
+                values.forEach((val, idx) => {
+                    if (eqFilters[idx]) eqFilters[idx].gain.value = val;
+                    const thumb = document.getElementById(`fader-thumb-${idx}`);
+                    const valText = document.getElementById(`eq-val-${idx}`);
+
+                    const rectHeight = 150;
+                    const relY = ((val + 12) / 24) * rectHeight;
+                    thumb.style.bottom = `${relY - 8}px`;
+                    valText.innerText = `${val > 0 ? '+' : ''}${val}dB`;
+                });
+            });
+        });
+
+        // Modular Pedals Switches
+        document.getElementById('switch-comp').addEventListener('click', () => {
+            compEnabled = !compEnabled;
+            document.getElementById('led-comp').className = compEnabled ? 'led-indicator active-cyan' : 'led-indicator';
+            rebuildAudioGraph();
+        });
+
+        document.getElementById('switch-filter').addEventListener('click', () => {
+            filterEnabled = !filterEnabled;
+            document.getElementById('led-filter').className = filterEnabled ? 'led-indicator active-green' : 'led-indicator';
+            rebuildAudioGraph();
+        });
+
+        document.getElementById('switch-chorus').addEventListener('click', () => {
+            chorusEnabled = !chorusEnabled;
+            document.getElementById('led-chorus').className = chorusEnabled ? 'led-indicator active-cyan' : 'led-indicator';
+            rebuildAudioGraph();
+        });
+
+        document.getElementById('switch-octave').addEventListener('click', () => {
+            octaveEnabled = !octaveEnabled;
+            document.getElementById('led-octave').className = octaveEnabled ? 'led-indicator active-amber' : 'led-indicator';
+            rebuildAudioGraph();
+        });
+
+        document.getElementById('switch-cab').addEventListener('click', () => {
+            cabEnabled = !cabEnabled;
+            document.getElementById('led-cab').className = cabEnabled ? 'led-indicator active-red' : 'led-indicator';
+            rebuildAudioGraph();
+        });
+
+        document.getElementById('select-cab').addEventListener('change', (e) => {
+            applyCabSimPreset(e.target.value);
+        });
+
+        /* --- Audio Recorder (WAV Export) Logic --- */
+        const btnRecordMaster = document.getElementById('btn-record-master');
+        const btnStopMaster = document.getElementById('btn-stop-master');
+        const downloadLink = document.getElementById('download-recording');
+
+        btnRecordMaster.addEventListener('click', () => {
+            if (!audioCtx) return;
+            const dest = audioCtx.createMediaStreamDestination();
+            masterOutputGain.connect(dest);
+
+            mediaRecorder = new MediaRecorder(dest.stream);
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.download = `ToneBassPro_Take_${Date.now()}.wav`;
+                downloadLink.classList.remove('hidden');
+            };
+
+            mediaRecorder.start();
+            btnRecordMaster.disabled = true;
+            btnStopMaster.disabled = false;
+            btnRecordMaster.classList.add('animate-pulse');
+        });
+
+        btnStopMaster.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                btnRecordMaster.disabled = false;
+                btnStopMaster.disabled = true;
+                btnRecordMaster.classList.remove('animate-pulse');
+            }
+        });
+
+        /* --- Jam Track Player --- */
+        document.getElementById('jam-file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const player = document.getElementById('jam-player');
+                player.src = URL.createObjectURL(file);
+                player.play();
+            }
+        });
+
+        document.getElementById('jam-speed').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('jam-player').playbackRate = val;
+            document.getElementById('txt-jam-speed').innerText = `${val.toFixed(1)}x`;
+        });
+
+        /* --- Metronome & Tap Tempo Engine --- */
+        const metronomeBpmInput = document.getElementById('metronome-bpm');
+        const metronomeBpmVal = document.getElementById('metronome-bpm-val');
+        const btnToggleMetronome = document.getElementById('btn-toggle-metronome');
+
+        metronomeBpmInput.addEventListener('input', (e) => {
+            metronomeBpmVal.innerText = `${e.target.value} BPM`;
+            if (isMetronomeRunning) {
+                restartMetronome();
+            }
+        });
+
+        btnToggleMetronome.addEventListener('click', () => {
+            if (!isMetronomeRunning) {
+                startMetronome();
+                btnToggleMetronome.innerText = "PARAR METRÔNOMO";
+                btnToggleMetronome.className = "w-full py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs font-orbitron rounded transition";
+            } else {
+                stopMetronome();
+                btnToggleMetronome.innerText = "INICIAR METRÔNOMO";
+                btnToggleMetronome.className = "w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs font-orbitron rounded transition";
+            }
+        });
+
+        function playClickSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = 1000;
+            gain.gain.value = 0.3;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function startMetronome() {
+            isMetronomeRunning = true;
+            const intervalMs = (60 / parseInt(metronomeBpmInput.value)) * 1000;
+            metronomeInterval = setInterval(playClickSound, intervalMs);
+        }
+
+        function stopMetronome() {
+            isMetronomeRunning = false;
+            clearInterval(metronomeInterval);
+        }
+
+        function restartMetronome() {
+            stopMetronome();
+            startMetronome();
+        }
+
+        // Tap Tempo Logic
+        document.getElementById('btn-tap-tempo').addEventListener('click', () => {
+            const now = Date.now();
+            tapTimes.push(now);
+            if (tapTimes.length > 4) tapTimes.shift();
+
+            if (tapTimes.length > 1) {
+                const intervals = [];
+                for (let i = 1; i < tapTimes.length; i++) {
+                    intervals.push(tapTimes[i] - tapTimes[i - 1]);
+                }
+                const avgInterval = intervals.reduce((a, b) => a + b) / intervals.length;
+                const bpm = Math.round(60000 / avgInterval);
+                if (bpm >= 40 && bpm <= 220) {
+                    metronomeBpmInput.value = bpm;
+                    metronomeBpmVal.innerText = `${bpm} BPM`;
+                    if (isMetronomeRunning) restartMetronome();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+```
+
+
+
+ 
+
+
+
+ 
