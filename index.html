@@ -590,7 +590,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Recorder Controls -->
                     <div class="bg-black/50 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-slate-400 font-orbitron block mb-2">GRAVAÇÃO MASTER (WAV)</span>
+                        <span class="text-[10px] font-bold text-slate-400 font-orbitron block mb-2">GRAVAÇÃO MASTER (MP3)</span>
                         <div class="flex items-center gap-2 mb-3">
                             <button id="btn-record-master" class="flex-1 py-2 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-xs font-orbitron transition flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-record-vinyl"></i> GRAVAR
@@ -600,7 +600,7 @@
                             </button>
                         </div>
                         <a id="download-recording" class="hidden w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs font-orbitron rounded text-center transition">
-                            <i class="fa-solid fa-download mr-1"></i> BAIXAR AUDIO WAV
+                            <i class="fa-solid fa-download mr-1"></i> BAIXAR AUDIO MP3
                         </a>
                     </div>
 
@@ -1308,7 +1308,7 @@
             applyCabSimPreset(e.target.value);
         });
 
-        // Audio Recorder (WAV Export) Logic
+        // Audio Recorder (MP3 Export Adjustment) Logic
         const btnRecordMaster = document.getElementById('btn-record-master');
         const btnStopMaster = document.getElementById('btn-stop-master');
         const downloadLink = document.getElementById('download-recording');
@@ -1318,7 +1318,16 @@
             const dest = audioCtx.createMediaStreamDestination();
             masterOutputGain.connect(dest);
 
-            mediaRecorder = new MediaRecorder(dest.stream);
+            // Tenta usar codecs de áudio comuns suportados pelo navegador para gravação compacta/MP3
+            let options = { mimeType: 'audio/webm;codecs=opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'audio/mp4' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = {};
+                }
+            }
+
+            mediaRecorder = new MediaRecorder(dest.stream, options);
             recordedChunks = [];
 
             mediaRecorder.ondataavailable = (e) => {
@@ -1326,10 +1335,10 @@
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                const blob = new Blob(recordedChunks, { type: options.mimeType || 'audio/mp3' });
                 const url = URL.createObjectURL(blob);
                 downloadLink.href = url;
-                downloadLink.download = `ToneBassPro_Take_${Date.now()}.wav`;
+                downloadLink.download = `ToneBassPro_Take_${Date.now()}.mp3`;
                 downloadLink.classList.remove('hidden');
             };
 
