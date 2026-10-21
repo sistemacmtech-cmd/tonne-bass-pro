@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tone Bass Pro Studio - Digital Audio Platform</title>
     
-    <!-- PWA / Mobile Home Screen Icons -->
+    <!-- Configurações PWA / Mobile Home Screen Icons -->
     <link rel="icon" type="image/jpeg" href="1000375071.jpg">
     <link rel="apple-touch-icon" href="1000375071.jpg">
     <meta name="theme-color" content="#0a0b0e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ToneBassPro">
     
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Tone%20Bass%20Pro%20Studio%22%2C%22short_name%22%3A%22ToneBassPro%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2308090c%22%2C%22theme_color%22%3A%22%230a0b0e%22%2C%22icons%22%3A%5B%7B%22src%22%3A%221000375071.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
+    <!-- Web App Manifest Incorporado (Inline Data URI) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Tone%20Bass%20Pro%20Studio%22%2C%22short_name%22%3A%22ToneBassPro%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2308090c%22%2C%22theme_color%22%3A%22%230a0b0e%22%2C%22icons%22%3A%5B%7B%22src%22%3A%221000375071.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -660,8 +663,17 @@
 
     </div>
 
-    <!-- AUDIO ENGINE, DSP MODELS & PLATFORM LOGIC -->
+    <!-- AUDIO ENGINE, DSP MODELS, PLATFORM LOGIC & PWA REGISTRATION -->
     <script>
+        // Registrador do Service Worker para PWA (Instalação no Celular)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker PWA Registrado com Sucesso:', reg.scope))
+                    .catch(err => console.error('Falha ao Registrar Service Worker PWA:', err));
+            });
+        }
+
         // Web Audio API State
         let audioCtx = null;
         let micStream = null;
