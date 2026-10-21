@@ -703,7 +703,20 @@
         // Pedals DSP
         let compEnabled = false, compNode = null;
         let filterEnabled = false, filterNode = null;
-        let chorusEnabled = false, chorusDelayNode = null, chorusLfoNode = null, chorusLfoGain = null;
+        
+        // True Stereo Chorus DSP Nodes
+        let chorusEnabled = false;
+        let chorusSplitter = null;
+        let chorusMerger = null;
+        let chorusDelayLeft = null;
+        let chorusDelayRight = null;
+        let chorusLfoLeft = null;
+        let chorusLfoRight = null;
+        let chorusLfoGainLeft = null;
+        let chorusLfoGainRight = null;
+        let chorusDryGain = null;
+        let chorusWetGain = null;
+
         let octaveEnabled = false, octaveGainNode = null, octaveSubGainNode = null;
         let cabEnabled = true, cabFilterNode = null;
 
@@ -805,16 +818,41 @@
             filterNode.frequency.value = 800;
             filterNode.Q.value = 6;
 
-            // Stereo Chorus
-            chorusDelayNode = audioCtx.createDelay();
-            chorusDelayNode.delayTime.value = 0.025;
-            chorusLfoNode = audioCtx.createOscillator();
-            chorusLfoGain = audioCtx.createGain();
-            chorusLfoNode.frequency.value = 1.2;
-            chorusLfoGain.gain.value = 0.005;
-            chorusLfoNode.connect(chorusLfoGain);
-            chorusLfoGain.connect(chorusDelayNode.delayTime);
-            chorusLfoNode.start();
+            // True Stereo Bass Chorus DSP Setup
+            chorusSplitter = audioCtx.createChannelSplitter(2);
+            chorusMerger = audioCtx.createChannelMerger(2);
+            chorusDelayLeft = audioCtx.createDelay();
+            chorusDelayRight = audioCtx.createDelay();
+            chorusDelayLeft.delayTime.value = 0.022;
+            chorusDelayRight.delayTime.value = 0.028;
+
+            chorusDryGain = audioCtx.createGain();
+            chorusWetGain = audioCtx.createGain();
+            chorusDryGain.gain.value = 0.7;
+            chorusWetGain.gain.value = 0.5;
+
+            chorusLfoLeft = audioCtx.createOscillator();
+            chorusLfoRight = audioCtx.createOscillator();
+            chorusLfoGainLeft = audioCtx.createGain();
+            chorusLfoGainRight = audioCtx.createGain();
+
+            const currentRate = parseFloat(document.getElementById('knob-chorus-rate').dataset.val) || 1.2;
+            const currentDepth = parseFloat(document.getElementById('knob-chorus-depth').dataset.val) || 50;
+
+            chorusLfoLeft.frequency.value = currentRate;
+            chorusLfoRight.frequency.value = currentRate;
+            
+            // Defasagem de 90 graus (quadratura estéreo) para alargar o campo sonoro
+            chorusLfoGainLeft.gain.value = (currentDepth / 100) * 0.006;
+            chorusLfoGainRight.gain.value = (currentDepth / 100) * 0.006;
+
+            chorusLfoLeft.connect(chorusLfoGainLeft);
+            chorusLfoRight.connect(chorusLfoGainRight);
+            chorusLfoGainLeft.connect(chorusDelayLeft.delayTime);
+            chorusLfoGainRight.connect(chorusDelayRight.delayTime);
+
+            chorusLfoLeft.start();
+            chorusLfoRight.start();
 
             // Cabinet Simulation
             cabFilterNode = audioCtx.createBiquadFilter();
@@ -871,17 +909,25 @@
                 current = filterNode;
             }
 
-            // 5. Chorus
+            // 5. Stereo Chorus (True Stereo L/R Path)
             if (chorusEnabled) {
-                const chorusSplitter = audioCtx.createGain();
-                current.connect(chorusSplitter);
-                chorusSplitter.connect(chorusDelayNode);
+                const chorusInput = current;
+                const chorusSum = audioCtx.createGain();
 
-                const chorusMerger = audioCtx.createGain();
-                chorusSplitter.connect(chorusMerger);
-                chorusDelayNode.connect(chorusMerger);
+                // Dry direct path
+                chorusInput.connect(chorusDryGain);
+                chorusDryGain.connect(chorusSum);
 
-                current = chorusMerger;
+                // Wet stereo chorus path
+                chorusInput.connect(chorusDelayLeft);
+                chorusInput.connect(chorusDelayRight);
+
+                chorusDelayLeft.connect(chorusWetGain);
+                chorusDelayRight.connect(chorusWetGain);
+
+                chorusWetGain.connect(chorusSum);
+
+                current = chorusSum;
             }
 
             // 6. Cabinet IR Sim
@@ -1182,9 +1228,16 @@
                     sansampParams[param] = currentVal;
                     updateSansAmpDSP();
                 } else if (param === 'chorus-rate') {
-                    if (chorusLfoNode) chorusLfoNode.frequency.value = currentVal;
+                    if (chorusLfoLeft && chorusLfoRight) {
+                        chorusLfoLeft.frequency.value = currentVal;
+                        chorusLfoRight.frequency.value = currentVal;
+                    }
                 } else if (param === 'chorus-depth') {
-                    if (chorusLfoGain) chorusLfoGain.gain.value = (currentVal / 100) * 0.01;
+                    if (chorusLfoGainLeft && chorusLfoGainRight) {
+                        const depthVal = (currentVal / 100) * 0.006;
+                        chorusLfoGainLeft.gain.value = depthVal;
+                        chorusLfoGainRight.gain.value = depthVal;
+                    }
                 } else if (param === 'filter-sense') {
                     if (filterNode) filterNode.frequency.value = currentVal;
                 } else if (param === 'filter-reso') {
@@ -1318,7 +1371,6 @@
             const dest = audioCtx.createMediaStreamDestination();
             masterOutputGain.connect(dest);
 
-            // Tenta usar codecs de áudio comuns suportados pelo navegador para gravação compacta/MP3
             let options = { mimeType: 'audio/webm;codecs=opus' };
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
                 options = { mimeType: 'audio/mp4' };
