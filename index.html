@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tone Bass Pro Studio - Digital Audio Platform</title>
+    
+    <!-- PWA / Mobile Home Screen Icons -->
+    <link rel="icon" type="image/jpeg" href="1000375071.jpg">
+    <link rel="apple-touch-icon" href="1000375071.jpg">
+    <meta name="theme-color" content="#0a0b0e">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Tone%20Bass%20Pro%20Studio%22%2C%22short_name%22%3A%22ToneBassPro%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2308090c%22%2C%22theme_color%22%3A%22%230a0b0e%22%2C%22icons%22%3A%5B%7B%22src%22%3A%221000375071.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -1072,8 +1081,6 @@
             requestAnimationFrame(drawEQSpectrumCanvas);
         }
 
-        /* --- STREAMING_CHUNK:UI Controls, Switches, Faders & Metronome Engine... --- */
-
         // Live Monitoring Button
         const btnLiveMonitor = document.getElementById('btn-live-monitor');
         const ledLiveMonitor = document.getElementById('led-live-monitor');
@@ -1289,7 +1296,7 @@
             applyCabSimPreset(e.target.value);
         });
 
-        /* --- Audio Recorder (WAV Export) Logic --- */
+        // Audio Recorder (WAV Export) Logic
         const btnRecordMaster = document.getElementById('btn-record-master');
         const btnStopMaster = document.getElementById('btn-stop-master');
         const downloadLink = document.getElementById('download-recording');
@@ -1329,7 +1336,7 @@
             }
         });
 
-        /* --- Jam Track Player --- */
+        // Jam Track Player
         document.getElementById('jam-file-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -1345,7 +1352,7 @@
             document.getElementById('txt-jam-speed').innerText = `${val.toFixed(1)}x`;
         });
 
-        /* --- Metronome & Tap Tempo Engine --- */
+        // Metronome & Tap Tempo Engine
         const metronomeBpmInput = document.getElementById('metronome-bpm');
         const metronomeBpmVal = document.getElementById('metronome-bpm-val');
         const btnToggleMetronome = document.getElementById('btn-toggle-metronome');
@@ -1420,12 +1427,4 @@
     </script>
 </body>
 </html>
-```
 
-
-
- 
-
-
-
- 
