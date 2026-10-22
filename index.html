@@ -663,6 +663,71 @@
 
     </div>
 
+    <!-- SEÇÃO DE POLÍTICA DE PRIVACIDADE E TERMOS DE USO -->
+    <footer class="w-full bg-slate-950 border-t border-brand-border mt-12 py-10 px-4 lg:px-8 text-slate-400 text-xs">
+        <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Informações da Aplicação e Criador -->
+            <div class="lg:col-span-4 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-500">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h4 class="text-sm font-bold font-orbitron text-white">TONE BASS PRO STUDIO</h4>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed mb-4">
+                        Plataforma digital avançada de simulação de áudio, rack de efeitos DSP e estúdio virtual de baixos desenvolvida para alta performance no navegador.
+                    </p>
+                </div>
+                <div class="p-3 bg-slate-900/80 rounded-lg border border-slate-800">
+                    <span class="block text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider">Desenvolvedor & Suporte</span>
+                    <span class="text-sm font-semibold text-yellow-500 font-mono">sistemacmtech@gmail.com</span>
+                </div>
+            </div>
+
+            <!-- Termos de Uso e Política de Privacidade Completa -->
+            <div class="lg:col-span-8 bg-black/40 p-5 rounded-xl border border-slate-800/80">
+                <h5 class="text-xs font-bold font-orbitron text-yellow-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract"></i> Política de Privacidade & Termos de Uso
+                </h5>
+                
+                <div class="space-y-3 text-[11px] leading-relaxed text-slate-300 max-h-60 overflow-y-auto pr-2">
+                    <div>
+                        <strong class="text-white block mb-0.5">1. Processamento e Privacidade de Áudio Local</strong>
+                        <p>O aplicativo Tone Bass Pro Studio processa todo o fluxo de entrada e saída de áudio (incluindo captura via microfone ou interface) exclusivamente em tempo real no seu dispositivo por meio da Web Audio API. Nenhuma gravação, sinal de som, áudio processado ou informação captorada pelo microfone é enviada, armazenada ou transmitida para servidores externos.</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-white block mb-0.5">2. Armazenamento de Dados e PWA</strong>
+                        <p>Arquivos exportados (gravações MP3/WebM) e faixas de acompanhamento (Backing Tracks) permanecem sob o controle exclusivo e armazenamento temporário do seu próprio navegador ou sistema operacional. O sistema PWA (Progressive Web App) utiliza cache local (Service Worker) unicamente para possibilitar a execução offline das ferramentas do estúdio.</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-white block mb-0.5">3. Permissões do Sistema</strong>
+                        <p>A solicitação de acesso ao microfone é estritamente necessária para a execução do monitoramento ao vivo, afinador cromático e rack de efeitos. O acesso pode ser concedido ou revogado a qualquer momento nas configurações do seu navegador.</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-white block mb-0.5">4. Isenção de Responsabilidade</strong>
+                        <p>O software é disponibilizado "como está". O desenvolvedor não se responsabiliza por eventuais danos aos equipamentos de som ou fones de ouvido decorrentes do uso de níveis excessivos de ganho, distorção ou volume do sistema.</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-white block mb-0.5">5. Contato e Propriedade Intelectual</strong>
+                        <p>Dúvidas, sugestões ou suporte técnico sobre esta plataforma digital devem ser encaminhados ao desenvolvedor responsável pelo e-mail: <a href="mailto:sistemacmtech@gmail.com" class="text-cyan-400 hover:underline font-mono">sistemacmtech@gmail.com</a>.</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-500">
+                    <span>© Tone Bass Pro Studio — Todos os direitos reservados.</span>
+                    <span class="font-mono text-slate-400">Criador: sistemacmtech@gmail.com</span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
     <!-- AUDIO ENGINE, DSP MODELS, PLATFORM LOGIC & PWA REGISTRATION -->
     <script>
         // Registrador do Service Worker para PWA (Instalação no Celular)
